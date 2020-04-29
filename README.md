@@ -8,10 +8,15 @@ Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which is a 
 - [Whitney Music Box](http://wustep.github.io/midi.js/WhitneyMusicBox.html)
 
 ## Installtion
-tbd
+```bash
+npm install https://github.com/wustep/midi.js
+yarn add https://github.com/wustep/midi.js
+```
 
 ## Import
-tbd
+``` JavaScript
+import MIDI from 'midi.js'	
+```
 
 ## Usage & APi
 #### [loader.js](./src/loader.js) - Decides which framework is best to use
