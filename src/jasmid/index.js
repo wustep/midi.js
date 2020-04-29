@@ -1,2 +1,2 @@
-export * from './midifile'
-export * from './replayer'
+export * from './midifile';
+export * from './replayer';

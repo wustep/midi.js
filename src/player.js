@@ -1,368 +1,412 @@
 /*
-  ----------------------------------------------------------
-  midi.Player : 0.3.1 : 2015-03-26
-  ----------------------------------------------------------
-  https://github.com/mudcube/midi.js
-  ----------------------------------------------------------
-*/
+ *----------------------------------------------------------
+ *midi.Player : 0.3.1 : 2015-03-26
+ *----------------------------------------------------------
+ *https://github.com/mudcube/midi.js
+ *----------------------------------------------------------
+ */
 
-import { MidiFile, Replayer } from './jasmid'
-import root from './root'
+import { MidiFile, Replayer } from './jasmid';
+import root from './root';
 
 (function () {
-  root.Player = {}
-  const player = root.Player
-  player.currentTime = 0
-  player.endTime = 0
-  player.restart = 0
-  player.playing = false
-  player.timeWarp = 1
-  player.startDelay = 0
-  player.BPM = 120
+  root.Player = {};
+  const player = root.Player;
+  player.currentTime = 0;
+  player.endTime = 0;
+  player.restart = 0;
+  player.playing = false;
+  player.timeWarp = 1;
+  player.startDelay = 0;
+  player.BPM = 120;
 
   player.start = player.resume = function (onsuccess) {
     if (player.currentTime < -1) {
-      player.currentTime = -1
+      player.currentTime = -1;
     }
-    startAudio(player.currentTime, null, onsuccess)
-  }
+    startAudio(player.currentTime, null, onsuccess);
+  };
 
   player.pause = function () {
-    var tmp = player.restart
-    stopAudio()
-    player.restart = tmp
-  }
+    const tmp = player.restart;
+    stopAudio();
+    player.restart = tmp;
+  };
 
   player.stop = function () {
-    stopAudio()
-    player.restart = 0
-    player.currentTime = 0
-  }
+    stopAudio();
+    player.restart = 0;
+    player.currentTime = 0;
+  };
 
   player.addListener = function (onsuccess) {
-    onMidiEvent = onsuccess
-  }
+    onMidiEvent = onsuccess;
+  };
 
   player.removeListener = function () {
-    onMidiEvent = undefined
-  }
+    onMidiEvent = undefined;
+  };
 
   player.clearAnimation = function () {
     if (player.animationFrameId) {
-      window.cancelAnimationFrame(player.animationFrameId)
+      window.cancelAnimationFrame(player.animationFrameId);
     }
-  }
+  };
 
   player.setAnimation = function (callback) {
-    var currentTime = 0
-    var tOurTime = 0
-    var tTheirTime = 0
+    let currentTime = 0;
+    let tOurTime = 0;
+    let tTheirTime = 0;
     //
-    player.clearAnimation()
+    player.clearAnimation();
     // /
     var frame = function () {
-      player.animationFrameId = window.requestAnimationFrame(frame)
+      player.animationFrameId = window.requestAnimationFrame(frame);
       // /
       if (player.endTime === 0) {
-        return
+        return;
       }
       if (player.playing) {
-        currentTime = (tTheirTime === player.currentTime) ? tOurTime - Date.now() : 0
+        currentTime =
+          tTheirTime === player.currentTime ? tOurTime - Date.now() : 0;
         if (player.currentTime === 0) {
-          currentTime = 0
+          currentTime = 0;
         } else {
-          currentTime = player.currentTime - currentTime
+          currentTime = player.currentTime - currentTime;
         }
         if (tTheirTime !== player.currentTime) {
-          tOurTime = Date.now()
-          tTheirTime = player.currentTime
+          tOurTime = Date.now();
+          tTheirTime = player.currentTime;
         }
-      } else { // paused
-        currentTime = player.currentTime
+      } else {
+        // paused
+        currentTime = player.currentTime;
       }
       // /
-      var endTime = player.endTime
+      const { endTime } = player;
       // var percent = currentTime / endTime
-      var total = currentTime / 1000
-      var minutes = total / 60
-      var seconds = total - (minutes * 60)
-      var t1 = minutes * 60 + seconds
-      var t2 = (endTime / 1000)
+      const total = currentTime / 1000;
+      const minutes = total / 60;
+      const seconds = total - minutes * 60;
+      const t1 = minutes * 60 + seconds;
+      const t2 = endTime / 1000;
       // /
       if (t2 - t1 < -1.0) {
-        return
       } else {
         callback({
           now: t1,
           end: t2,
-          events: noteRegistrar
-        })
+          events: noteRegistrar,
+        });
       }
-    }
+    };
     // /
-    window.requestAnimationFrame(frame)
-  }
+    window.requestAnimationFrame(frame);
+  };
 
   // helpers
 
   player.loadMidiFile = function (onsuccess, onprogress, onerror) {
     try {
       // console.log(MidiFile(player.currentData), new Replayer(MidiFile(player.currentData), player.timeWarp, null, player.BPM))
-      player.replayer = new Replayer(MidiFile(player.currentData), player.timeWarp, null, player.BPM)
-      player.data = player.replayer.getData()
-      player.endTime = getLength()
+      player.replayer = new Replayer(
+        MidiFile(player.currentData),
+        player.timeWarp,
+        null,
+        player.BPM
+      );
+      player.data = player.replayer.getData();
+      player.endTime = getLength();
       // /
       root.loadPlugin({
         // instruments: player.getFileInstruments(),
-        onsuccess: onsuccess,
-        onprogress: onprogress,
-        onerror: onerror
-      })
+        onsuccess,
+        onprogress,
+        onerror,
+      });
     } catch (event) {
-      console.error(event)
-      onerror && onerror(event)
+      console.error(event);
+      onerror && onerror(event);
     }
-  }
+  };
 
   player.loadFile = function (file, onsuccess, onprogress, onerror) {
-    player.stop()
+    player.stop();
     if (file.indexOf('base64,') !== -1) {
-      var data = window.atob(file.split(',')[1])
-      player.currentData = data
-      player.loadMidiFile(onsuccess, onprogress, onerror)
+      const data = window.atob(file.split(',')[1]);
+      player.currentData = data;
+      player.loadMidiFile(onsuccess, onprogress, onerror);
     } else {
-      var fetch = new window.XMLHttpRequest()
-      fetch.open('GET', file)
-      fetch.overrideMimeType('text/plain; charset=x-user-defined')
+      const fetch = new window.XMLHttpRequest();
+      fetch.open('GET', file);
+      fetch.overrideMimeType('text/plain; charset=x-user-defined');
       fetch.onreadystatechange = function () {
         if (this.readyState === 4) {
           if (this.status === 200) {
-            var t = this.responseText || ''
-            var ff = []
-            var mx = t.length
-            var scc = String.fromCharCode
-            for (var z = 0; z < mx; z++) {
-              ff[z] = scc(t.charCodeAt(z) & 255)
+            const t = this.responseText || '';
+            const ff = [];
+            const mx = t.length;
+            const scc = String.fromCharCode;
+            for (let z = 0; z < mx; z++) {
+              ff[z] = scc(t.charCodeAt(z) & 255);
             }
             // /
-            var data = ff.join('')
-            player.currentData = data
-            player.loadMidiFile(onsuccess, onprogress, onerror)
+            const data = ff.join('');
+            player.currentData = data;
+            player.loadMidiFile(onsuccess, onprogress, onerror);
           } else {
-            onerror && onerror('Unable to load MIDI file')
+            onerror && onerror('Unable to load MIDI file');
           }
         }
-      }
-      fetch.send()
+      };
+      fetch.send();
     }
-  }
+  };
 
   player.getFileInstruments = function () {
-    var instruments = {}
-    var programs = {}
-    for (var n = 0; n < player.data.length; n++) {
-      var event = player.data[n][0].event
+    const instruments = {};
+    const programs = {};
+    for (let n = 0; n < player.data.length; n++) {
+      const { event } = player.data[n][0];
       if (event.type !== 'channel') {
-        continue
+        continue;
       }
-      var channel = event.channel
+      const { channel } = event;
       switch (event.subtype) {
         case 'controller':
           //        console.log(event.channel, root.defineControl[event.controllerType], event.value)
-          break
+          break;
         case 'programChange':
-          programs[channel] = event.programNumber
-          break
+          programs[channel] = event.programNumber;
+          break;
         case 'noteOn':
-          var program = programs[channel]
-          var gm = root.GM.byId[isFinite(program) ? program : channel]
-          instruments[gm.id] = true
-          break
+          var program = programs[channel];
+          var gm = root.GM.byId[isFinite(program) ? program : channel];
+          instruments[gm.id] = true;
+          break;
       }
     }
-    var ret = []
-    for (var key in instruments) {
-      ret.push(key)
+    const ret = [];
+    for (const key in instruments) {
+      ret.push(key);
     }
-    return ret
-  }
+    return ret;
+  };
 
   // Playing the audio
 
-  var eventQueue = [] // hold events to be triggered
-  var queuedTime //
-  var startTime = 0 // to measure time elapse
-  var noteRegistrar = {} // get event for requested note
-  var onMidiEvent // listener
-  var scheduleTracking = function (channel, note, currentTime, offset, message, velocity, time) {
+  const eventQueue = []; // hold events to be triggered
+  let queuedTime; //
+  let startTime = 0; // to measure time elapse
+  var noteRegistrar = {}; // get event for requested note
+  let onMidiEvent; // listener
+  const scheduleTracking = function (
+    channel,
+    note,
+    currentTime,
+    offset,
+    message,
+    velocity,
+    time
+  ) {
     return setTimeout(function () {
-      var data = {
-        channel: channel,
-        note: note,
+      const data = {
+        channel,
+        note,
         now: currentTime,
         end: player.endTime,
-        message: message,
-        velocity: velocity
-      }
+        message,
+        velocity,
+      };
       //
       if (message === 128) {
-        delete noteRegistrar[note]
+        delete noteRegistrar[note];
       } else {
-        noteRegistrar[note] = data
+        noteRegistrar[note] = data;
       }
       if (onMidiEvent) {
-        onMidiEvent(data)
+        onMidiEvent(data);
       }
-      player.currentTime = currentTime
+      player.currentTime = currentTime;
       // /
-      eventQueue.shift()
+      eventQueue.shift();
       // /
       if (eventQueue.length < 1000) {
-        startAudio(queuedTime, true)
-      } else if (player.currentTime === queuedTime && queuedTime < player.endTime) { // grab next sequence
-        startAudio(queuedTime, true)
+        startAudio(queuedTime, true);
+      } else if (
+        player.currentTime === queuedTime &&
+        queuedTime < player.endTime
+      ) {
+        // grab next sequence
+        startAudio(queuedTime, true);
       }
-    }, currentTime - offset)
-  }
+    }, currentTime - offset);
+  };
 
-  var getContext = function () {
+  const getContext = function () {
     if (root.api === 'webaudio') {
-      return root.WebAudio.getContext()
-    } else {
-      player.ctx = {currentTime: 0}
+      return root.WebAudio.getContext();
     }
-    return player.ctx
-  }
+    player.ctx = { currentTime: 0 };
+
+    return player.ctx;
+  };
 
   var getLength = function () {
-    var data = player.data
-    var length = data.length
-    var totalTime = 0.5
-    for (var n = 0; n < length; n++) {
-      totalTime += data[n][1]
+    const { data } = player;
+    const { length } = data;
+    let totalTime = 0.5;
+    for (let n = 0; n < length; n++) {
+      totalTime += data[n][1];
     }
-    return totalTime
-  }
+    return totalTime;
+  };
 
-  var __now
-  var getNow = function () {
+  let __now;
+  const getNow = function () {
     if (window.performance && window.performance.now) {
-      return window.performance.now()
-    } else {
-      return Date.now()
+      return window.performance.now();
     }
-  }
+    return Date.now();
+  };
 
   var startAudio = function (currentTime, fromCache, onsuccess) {
     if (!player.replayer) {
-      return
+      return;
     }
     if (!fromCache) {
       if (typeof currentTime === 'undefined') {
-        currentTime = player.restart
+        currentTime = player.restart;
       }
       // /
-      player.playing && stopAudio()
-      player.playing = true
-      player.data = player.replayer.getData()
-      player.endTime = getLength()
+      player.playing && stopAudio();
+      player.playing = true;
+      player.data = player.replayer.getData();
+      player.endTime = getLength();
     }
     // /
-    var note
-    var offset = 0
-    var messages = 0
-    var data = player.data
-    var ctx = getContext()
-    var length = data.length
+    let note;
+    let offset = 0;
+    let messages = 0;
+    const { data } = player;
+    const ctx = getContext();
+    const { length } = data;
     //
-    queuedTime = 0.5
+    queuedTime = 0.5;
     // /
     // var interval = eventQueue[0] && eventQueue[0].interval || 0
-    var foffset = currentTime - player.currentTime
+    const foffset = currentTime - player.currentTime;
     // /
-    if (root.api !== 'webaudio') { // set currentTime on ctx
-      var now = getNow()
-      __now = __now || now
-      ctx.currentTime = (now - __now) / 1000
+    if (root.api !== 'webaudio') {
+      // set currentTime on ctx
+      const now = getNow();
+      __now = __now || now;
+      ctx.currentTime = (now - __now) / 1000;
     }
     // /
-    startTime = ctx.currentTime
+    startTime = ctx.currentTime;
     // /
-    for (var n = 0; n < length && messages < 100; n++) {
-      var obj = data[n]
+    for (let n = 0; n < length && messages < 100; n++) {
+      const obj = data[n];
       if ((queuedTime += obj[1]) <= currentTime) {
-        offset = queuedTime
-        continue
+        offset = queuedTime;
+        continue;
       }
       // /
-      currentTime = queuedTime - offset
+      currentTime = queuedTime - offset;
       // /
-      var event = obj[0].event
+      const { event } = obj[0];
       if (event.type !== 'channel') {
-        continue
+        continue;
       }
       // /
-      var channelId = event.channel
-      var channel = root.channels[channelId]
-      var delay = ctx.currentTime + ((currentTime + foffset + player.startDelay) / 1000)
-      var queueTime = queuedTime - offset + player.startDelay
+      const channelId = event.channel;
+      const channel = root.channels[channelId];
+      const delay =
+        ctx.currentTime + (currentTime + foffset + player.startDelay) / 1000;
+      const queueTime = queuedTime - offset + player.startDelay;
       switch (event.subtype) {
         case 'controller':
-          root.setController(channelId, event.controllerType, event.value, delay)
-          break
+          root.setController(
+            channelId,
+            event.controllerType,
+            event.value,
+            delay
+          );
+          break;
         case 'programChange':
-          root.programChange(channelId, event.programNumber, delay)
-          break
+          root.programChange(channelId, event.programNumber, delay);
+          break;
         case 'pitchBend':
-          root.pitchBend(channelId, event.value, delay)
-          break
+          root.pitchBend(channelId, event.value, delay);
+          break;
         case 'noteOn':
-          if (channel.mute) break
-          note = event.noteNumber - (player.MIDIOffset || 0)
+          if (channel.mute) break;
+          note = event.noteNumber - (player.MIDIOffset || 0);
           eventQueue.push({
-            event: event,
+            event,
             time: queueTime,
-            source: root.noteOn(channelId, event.noteNumber, event.velocity, delay),
-            interval: scheduleTracking(channelId, note, queuedTime + player.startDelay, offset - foffset, 144, event.velocity)
-          })
-          messages++
-          break
+            source: root.noteOn(
+              channelId,
+              event.noteNumber,
+              event.velocity,
+              delay
+            ),
+            interval: scheduleTracking(
+              channelId,
+              note,
+              queuedTime + player.startDelay,
+              offset - foffset,
+              144,
+              event.velocity
+            ),
+          });
+          messages++;
+          break;
         case 'noteOff':
-          if (channel.mute) break
-          note = event.noteNumber - (player.MIDIOffset || 0)
+          if (channel.mute) break;
+          note = event.noteNumber - (player.MIDIOffset || 0);
           eventQueue.push({
-            event: event,
+            event,
             time: queueTime,
             source: root.noteOff(channelId, event.noteNumber, delay),
-            interval: scheduleTracking(channelId, note, queuedTime, offset - foffset, 128, 0)
-          })
-          break
+            interval: scheduleTracking(
+              channelId,
+              note,
+              queuedTime,
+              offset - foffset,
+              128,
+              0
+            ),
+          });
+          break;
         default:
-          break
+          break;
       }
     }
     // /
-    onsuccess && onsuccess(eventQueue)
-  }
+    onsuccess && onsuccess(eventQueue);
+  };
 
   var stopAudio = function () {
-    var ctx = getContext()
-    player.playing = false
-    player.restart += (ctx.currentTime - startTime) * 1000
+    const ctx = getContext();
+    player.playing = false;
+    player.restart += (ctx.currentTime - startTime) * 1000;
     // stop the audio, and intervals
     while (eventQueue.length) {
-      let o = eventQueue.pop()
-      window.clearInterval(o.interval)
-      if (!o.source) continue // is not webaudio
-      if (typeof (o.source) === 'number') {
-        window.clearTimeout(o.source)
-      } else { // webaudio
-        o.source.disconnect(0)
+      const o = eventQueue.pop();
+      window.clearInterval(o.interval);
+      if (!o.source) continue; // is not webaudio
+      if (typeof o.source === 'number') {
+        window.clearTimeout(o.source);
+      } else {
+        // webaudio
+        o.source.disconnect(0);
       }
     }
     // run callback to cancel any notes still playing
-    for (var key in noteRegistrar) {
-      let o = noteRegistrar[key]
+    for (const key in noteRegistrar) {
+      const o = noteRegistrar[key];
       if (noteRegistrar[key].message === 144 && onMidiEvent) {
         onMidiEvent({
           channel: o.channel,
@@ -370,11 +414,11 @@ import root from './root'
           now: o.now,
           end: o.end,
           message: 128,
-          velocity: o.velocity
-        })
+          velocity: o.velocity,
+        });
       }
     }
     // reset noteRegistrar
-    noteRegistrar = {}
-  }
-})()
+    noteRegistrar = {};
+  };
+})();
