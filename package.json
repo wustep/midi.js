@@ -1,13 +1,13 @@
 {
   "name": "midi.js",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "description": "A modern JavaScript port of MIDI.js.",
-  "author": "SuneBear",
+  "author": "wustep",
   "license": "MIT",
-  "homepage": "https://github.com/SuneBear/midi.js",
+  "homepage": "https://github.com/wustep/midi.js",
   "repository": {
     "type": "git",
-    "url": "git@github.com:SuneBear/midi.js.git"
+    "url": "git@github.com:wustep/midi.js.git"
   },
   "keywords": [
     "midi",
