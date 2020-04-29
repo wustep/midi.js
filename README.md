@@ -1,19 +1,17 @@
 # midi.js
 A modern JavaScript port of MIDI.js.
 
-## Basic Examples
-- [MIDI Player](http://sunebear.github.io/midi.js/MIDIPlayer.html)
-- [Whitney Music Box](http://sunebear.github.io/midi.js/WhitneyMusicBox.html)
+Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which is a fork of [mudcube/midi.js](https://github.com/mudcube/MIDI.js). 
+
+## Examples
+- [MIDI Player](http://wustep.github.io/midi.js/MIDIPlayer.html)
+- [Whitney Music Box](http://wustep.github.io/midi.js/WhitneyMusicBox.html)
 
 ## Installtion
-``` bash
-$ npm install midi.js
-```
+tbd
 
 ## Import
-``` JavaScript
-import MIDI from 'midi.js'
-```
+tbd
 
 ## Usage & APi
 #### [loader.js](./src/loader.js) - Decides which framework is best to use
