@@ -1,15 +1,14 @@
 const webpack = require('webpack')
-const UglifyJsPlugin = webpack.optimize.UglifyJsPlugin
 const path = require('path')
 const isBuild = !!process.env.BUILD || false
 
 const libraryName = 'midi'
 
-const plugins = []
+const plugins = {}
 let outputFile
 
 if (isBuild) {
-  plugins.push(new UglifyJsPlugin({ minimize: true }))
+  plugins['optimization'] = {minimize: true}
   outputFile = libraryName + '.min.js'
 } else {
   outputFile = libraryName + '.js'
@@ -27,29 +26,30 @@ const config = {
     libraryTarget: 'umd',
     umdNamedDefine: true
   },
+  mode: isBuild ? 'production' : 'development',
   module: {
-    loaders: [
+    rules: [
       {
         test: /(\.js)$/,
-        loader: 'babel',
-        exclude: /(node_modules|bower_components)/
+        loader: 'babel-loader',
+        exclude: /node_modules/
       },
       {
         test: /(\.js)$/,
-        loader: "standard",
-        exclude: /node_modules/
+        loader: "standard-loader",
+        exclude: /node_modules/,
+        options: {
+          parser: 'babel-eslint',
+          global: [ '__DEBUG__' ]
+        }
       }
-    ]
+    ],
   },
   resolve: {
-    root: path.resolve('./src'),
-    extensions: ['', '.js']
+    modules: [path.resolve('./src')],
+    extensions: ['.js']
   },
-  plugins: plugins,
-  standard: {
-    parser: 'babel-eslint',
-    global: [ '__DEBUG__' ]
-  }
+  ...plugins,
 }
 
 module.exports = config

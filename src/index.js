@@ -5,4 +5,4 @@ import './player'
 import './plugins'
 
 window.MIDI = root
-export default root
+module.exports = root
