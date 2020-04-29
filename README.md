@@ -2,7 +2,16 @@
 
 A modern JavaScript port of MIDI.js.
 
-Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which is a fork of [mudcube/midi.js](https://github.com/mudcube/MIDI.js).
+Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which modernized the original library [mudcube/midi.js](https://github.com/mudcube/MIDI.js) in 2016. 
+
+## Goals
+This is an opinionated port of midi.js that intends to:
+- Modernize with tools from babel's [preset-env](https://babeljs.io/docs/en/babel-preset-env), webpack, and more
+- Add prettier, eslint, and flow support
+- Add sustain pedal playback support
+
+[See mscuthbert/midi.js](https://github.com/mscuthbert/midicube) for an alternative that may work for you!
+
 
 ## Examples
 
