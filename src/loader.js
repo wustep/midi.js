@@ -18,6 +18,7 @@
 import root from './root';
 import { audioDetect, loadScript, request } from './utils';
 
+root.loadScript = loadScript;
 root.Soundfont = {};
 root.DEBUG = true;
 root.USE_XHR = true;
