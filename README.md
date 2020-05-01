@@ -2,7 +2,17 @@
 
 A modern JavaScript port of MIDI.js.
 
-Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which is a fork of [mudcube/midi.js](https://github.com/mudcube/MIDI.js).
+Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which modernized the original library [mudcube/midi.js](https://github.com/mudcube/MIDI.js) in 2016. Thanks to the original contributors of both repos, especially [mudcube](https://github.com/mudcube)! 
+
+## Goals
+This is an opinionated port of midi.js that intends to:
+- Modernize with tools from babel's [preset-env](https://babeljs.io/docs/en/babel-preset-env), webpack, and more
+- Use [prettier](https://prettier.io/) and [eslint](https://eslint.org/), following a revised version of [Airbnb's JS style guide](https://github.com/airbnb/javascript) and their [eslint config](https://www.npmjs.com/package/eslint-config-airbnb-base)
+- Add sustain pedal playback support
+
+## Deviations from midi.js
+
+None yet!
 
 ## Examples
 
@@ -16,13 +26,13 @@ npm install https://github.com/wustep/midi.js
 yarn add https://github.com/wustep/midi.js
 ```
 
-## Import
+## Usage
 
 ```JavaScript
-import MIDI from 'midi.js'
+import MIDI from 'midi.js';
 ```
 
-## Usage & APi
+## Usage & API
 
 #### [loader.js](./src/loader.js) - Decides which framework is best to use
 
@@ -94,3 +104,4 @@ Refer to https://github.com/mudcube/MIDI.js#api for more details.
 ## License
 
 [MIT](./LICENSE)
+
