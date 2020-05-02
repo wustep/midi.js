@@ -57,12 +57,9 @@ import root from './root';
     let currentTime = 0;
     let tOurTime = 0;
     let tTheirTime = 0;
-    //
     player.clearAnimation();
-    // /
-    var frame = function () {
+    const frame = function () {
       player.animationFrameId = window.requestAnimationFrame(frame);
-      // /
       if (player.endTime === 0) {
         return;
       }
@@ -79,12 +76,9 @@ import root from './root';
           tTheirTime = player.currentTime;
         }
       } else {
-        // paused
         currentTime = player.currentTime;
       }
-      // /
       const { endTime } = player;
-      // var percent = currentTime / endTime
       const total = currentTime / 1000;
       const minutes = total / 60;
       const seconds = total - minutes * 60;
@@ -327,12 +321,24 @@ import root from './root';
       const queueTime = queuedTime - offset + player.startDelay;
       switch (event.subtype) {
         case 'controller':
-          root.setController(
-            channelId,
-            event.controllerType,
-            event.value,
-            delay
-          );
+          eventQueue.push({
+            event,
+            time: queueTime,
+            source: root.setController(
+              channelId,
+              event.controllerType,
+              event.value,
+              delay
+            ),
+            interval: scheduleTracking(
+              channelId,
+              event.controllerType,
+              queuedTime + player.startDelay,
+              offset - foffset,
+              176,
+              event.value
+            ),
+          });
           break;
         case 'programChange':
           root.programChange(channelId, event.programNumber, delay);
