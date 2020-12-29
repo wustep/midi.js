@@ -15,7 +15,7 @@ module.exports = {
     // Custom overrides
     'import/prefer-default-export': 'off',
     'import/order': 'off',
-    'simple-import-sort/sort': [
+    'simple-import-sort/imports': [
       'error', // Not enforced by airbnb
       // Adapted from https://github.com/lydell/eslint-plugin-simple-import-sort/blob/master/examples/.eslintrc.js
       {

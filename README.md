@@ -6,15 +6,42 @@ Forked from [SuneBear/midi.js](https://github.com/SuneBear/midi.js), which moder
 
 ## Goals
 
-This is an opinionated port of midi.js that intends to:
+This is an opinionated, modern port of midi.js that intends to:
 
 - Modernize with tools from babel's [preset-env](https://babeljs.io/docs/en/babel-preset-env), webpack, and more
 - Use [prettier](https://prettier.io/) and [eslint](https://eslint.org/), following a revised version of [Airbnb's JS style guide](https://github.com/airbnb/javascript) and their [eslint config](https://www.npmjs.com/package/eslint-config-airbnb-base)
-- Add controller change playback support (e.g. sustain)
+- Add controller change playback support (e.g. sustain) and some other quality of life changes
 
-## Deviations from midi.js
+## API Deviations from mudcube/midi.js and SuneBear/midi.js
 
 1. `MIDI.Player.addListener(function (data) => {})` now supports listening to MIDI controller events (e.g. sustain)
+2. `MIDI.Player.addListener` and `MIDI.Player.removeListener` now supports adding multiple listeners and removing a specific listener (instead of just replacing the same one). Types are below:
+
+### MIDI.Player types
+
+```javascript
+type MIDIEvent = {|
+  channel: ?number,
+  note: ?number,
+  now: number,
+  end: number,
+  message: number,
+  velocity: ?number,
+|};
+
+type Player = {
+  // Now returns the listener you provided and will not replace the existing listener
+  addListener: (
+    (midiEvent: MIDIEvent) => void
+  ) => (midiEvent: MIDIEvent) => void,
+
+  // Now removes the listener you specify instead of removing the (only) existing listener
+  // If no listener is provided, removes all listeners.
+  // Returns whether or not a listener was removed
+  removeListener: (listener: ?(midiEvent: MIDIEvent) => void) => boolean,
+  ...
+};
+```
 
 ## Examples
 
@@ -76,8 +103,7 @@ MIDI.Player.stop(); // stops all audio being played, and resets currentTime to 0
 #### Listener for when notes are played
 
 ```javascript
-MIDI.Player.removeListener(); // removes current listener.
-MIDI.Player.addListener(function (data) {
+const listener = MIDI.Player.addListener(function (data) {
   // set it to your own function!
   const now = data.now; // where we are now
   const end = data.end; // time when song ends
@@ -87,6 +113,7 @@ MIDI.Player.addListener(function (data) {
   const velocity = data.velocity; // the velocity of the note
   // then do whatever you want with the information!
 });
+MIDI.Player.removeListener(listener);
 ```
 
 #### Smooth animation interpolating between onMidiEvent calls

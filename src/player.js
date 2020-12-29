@@ -19,7 +19,9 @@ import root from './root';
   player.timeWarp = 1;
   player.startDelay = 0;
   player.BPM = 120;
+  player.listeners = [];
 
+  // eslint-disable-next-line no-multi-assign
   player.start = player.resume = function (onsuccess) {
     if (player.currentTime < -1) {
       player.currentTime = -1;
@@ -39,12 +41,23 @@ import root from './root';
     player.currentTime = 0;
   };
 
-  player.addListener = function (onsuccess) {
-    onMidiEvent = onsuccess;
+  player.addListener = function (listener) {
+    player.listeners.push(listener);
+    return listener;
   };
 
-  player.removeListener = function () {
-    onMidiEvent = undefined;
+  player.removeListener = function (listener) {
+    if (listener) {
+      const index = player.listeners.indexOf(listener);
+      if (index > -1) {
+        player.listeners.splice(index, 1);
+        return true;
+      }
+    } else if (player.listeners.length > 0) {
+      player.listeners = [];
+      return true;
+    }
+    return false;
   };
 
   player.clearAnimation = function () {
@@ -193,7 +206,6 @@ import root from './root';
   let queuedTime; //
   let startTime = 0; // to measure time elapse
   var noteRegistrar = {}; // get event for requested note
-  let onMidiEvent; // listener
   const scheduleTracking = function (
     channel,
     note,
@@ -218,9 +230,9 @@ import root from './root';
       } else {
         noteRegistrar[note] = data;
       }
-      if (onMidiEvent) {
-        onMidiEvent(data);
-      }
+      player.listeners.forEach((listener) => {
+        listener(data);
+      });
       player.currentTime = currentTime;
       // /
       eventQueue.shift();
@@ -413,14 +425,16 @@ import root from './root';
     // run callback to cancel any notes still playing
     for (const key in noteRegistrar) {
       const o = noteRegistrar[key];
-      if (noteRegistrar[key].message === 144 && onMidiEvent) {
-        onMidiEvent({
-          channel: o.channel,
-          note: o.note,
-          now: o.now,
-          end: o.end,
-          message: 128,
-          velocity: o.velocity,
+      if (noteRegistrar[key].message === 144) {
+        player.listeners.forEach((listener) => {
+          listener({
+            channel: o.channel,
+            note: o.note,
+            now: o.now,
+            end: o.end,
+            message: 128,
+            velocity: o.velocity,
+          });
         });
       }
     }
