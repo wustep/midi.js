@@ -21,8 +21,9 @@
   "scripts": {
     "dev": "webpack --progress --colors --watch & browser-sync start -s examples --ss lib --files examples lib --no-open",
     "build": "rm -rf lib && webpack && BUILD=1 webpack",
-    "test": "mocha --require @babel/register --require jsdom-global/register --colors -w ./test/*.spec.js",
-    "deploy": "gh-pages -d examples && gh-pages -d lib -a"
+    "test": "npm run build:ts && node test/run.js",
+    "deploy": "gh-pages -d examples && gh-pages -d lib -a",
+    "build:ts": "tsc"
   },
   "devDependencies": {
     "@babel/cli": "^7.8.4",
